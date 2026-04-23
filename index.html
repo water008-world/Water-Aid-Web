@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login • Automated Water Flow System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="base.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-wrap {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .login-wrap h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .login-wrap p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .form-fields {
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        .form-fields .input-box {
+            margin-bottom: 20px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: var(--accent-blue);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .login-powered {
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        .login-powered p {
+            margin-bottom: 16px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrap">
+        <div style="display: flex; justify-content: center; margin-bottom: 24px;">
+            <div class="brand-icon" style="width: 50px; height: 50px; font-size: 20px;">AWF</div>
+        </div>
+        <h1>System Access</h1>
+        <p>Automated Water Flow Management Portal</p>
+
+        <form id="loginForm">
+            <div class="form-fields">
+                <div class="input-box">
+                    <label>Admin ID</label>
+                    <input type="text" id="uname" placeholder="Enter admin ID" required>
+                </div>
+                <div class="input-box">
+                    <label>Password</label>
+                    <input type="password" id="upass" placeholder="••••••••" required>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn" id="loginBtn">Authorize Access</button>
+        </form>
+
+        <script>
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const u = document.getElementById('uname').value;
+                const p = document.getElementById('upass').value;
+                const btn = document.getElementById('loginBtn');
+                btn.textContent = "Verifying Identity...";
+                
+                try {
+                    const res = await fetch('http://127.0.0.1:5000/api/login', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({username: u, password: p})
+                    });
+                    const data = await res.json();
+                    
+                    if(data.success) {
+                        // Store the admin profile globally
+                        localStorage.setItem('awf_adminAuth', JSON.stringify(data.admin));
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        alert(data.message || "Invalid credentials");
+                        btn.textContent = "Authorize Access";
+                    }
+                } catch(err) {
+                    console.error(err);
+                    alert("Backend API is currently offline. Ensure api.py is running!");
+                    btn.textContent = "Authorize Access";
+                }
+            });
+        </script>
+
+        <div class="login-powered">
+            <p>Powered By</p>
+            <div style="display: flex; justify-content: center; gap: 30px;">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Daffodil_International_University_Monogram.svg/1280px-Daffodil_International_University_Monogram.svg.png" 
+                     alt="DIU" style="height: 35px; opacity: 0.7;">
+                <img src="https://www.wateraid.org/au/sites/g/files/jkxoof231/files/wateraids-new-logo.png" 
+                     alt="WaterAid" style="height: 35px; opacity: 0.7;">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

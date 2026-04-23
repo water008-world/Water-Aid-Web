@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Infrastructure • Automated Water Flow System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="base.css">
+    <style>
+        .flag-toggle {
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            background-color: var(--bg-main);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .flag-toggle.flagged {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .flag-toggle:hover {
+            opacity: 0.8;
+        }
+
+        .success-msg {
+            color: var(--success);
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside>
+            <div class="brand">
+                <div class="brand-icon">AWF</div>
+                <div class="brand-info">
+                    <h1>Water Flow</h1>
+                    <p>Management</p>
+                </div>
+            </div>
+
+            <nav>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="manage.html" class="nav-link active">Manage Devices</a>
+                <a href="billing-audit.html" class="nav-link">Billing & Audit</a>
+                <a href="network-status.html" class="nav-link">Network Status</a>
+                <a href="device-settings.html" class="nav-link">Device Settings</a>
+            </nav>
+
+            <div class="powered-footer">
+                <p>Strategic Partners</p>
+                <div class="footer-logos">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Daffodil_International_University_Monogram.svg/1280px-Daffodil_International_University_Monogram.svg.png" 
+                         alt="DIU">
+                    <img src="https://www.wateraid.org/au/sites/g/files/jkxoof231/files/wateraids-new-logo.png" 
+                         alt="WaterAid">
+                </div>
+                <a href="#" onclick="localStorage.removeItem('awf_adminAuth'); window.location.href='index.html';" class="nav-link" style="margin-top: 32px; color: var(--danger); justify-content: center; padding-left: 0;">Logout System</a>
+            </div>
+        </aside>
+
+        <main>
+            <header>
+                <div class="page-title">
+                    <h2>Infrastructure Management</h2>
+                    <p>Register new nodes and monitor system health</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="text-align: right;">
+                        <p style="font-weight: 700; font-size: 14px;">System Admin</p>
+                        <p style="font-size: 11px; color: var(--text-secondary);">Zone 05 • Central Auth</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-panel" style="margin-bottom: 32px;">
+                <div class="panel-header">
+                    <h2>Register New Device Node</h2>
+                </div>
+                <form id="addDeviceForm" class="form-section" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="input-box">
+                        <label>Consumer Name</label>
+                        <input type="text" id="ownerName" placeholder="CHAIRMAN, BRTA" required>
+                    </div>
+                    <div class="input-box">
+                        <label>Device SIM / Contact</label>
+                        <input type="tel" id="ownerPhone" placeholder="01XXXXXXXXX" required>
+                    </div>
+                    <div class="input-box">
+                        <label>Account Number</label>
+                        <input type="text" id="accountNo" placeholder="19485038" required>
+                    </div>
+                    <div class="input-box">
+                        <label>Device ID (Hardware Node)</label>
+                        <input type="text" id="deviceId" placeholder="2000120320260001" required>
+                    </div>
+                    
+                    <div class="input-box" style="grid-column: span 3;">
+                        <label>Consumer Address</label>
+                        <input type="text" id="location" placeholder="HEAD QUATER, CHAIRMAN BARI, BANANI, DHAKA" required>
+                    </div>
+
+                    <div class="input-box">
+                        <label>DIU Number</label>
+                        <input type="text" id="diu" placeholder="ALL DIU">
+                    </div>
+                    <div class="input-box">
+                        <label>Meter Number</label>
+                        <input type="text" id="meterNo" placeholder="18095012">
+                    </div>
+                    <div class="input-box">
+                        <label>Meter Brand</label>
+                        <input type="text" id="meterBrand" placeholder="BAYLAN">
+                    </div>
+
+                    <div class="input-box">
+                        <label>Meter Diameter (mm)</label>
+                        <input type="text" id="meterDiameter" placeholder="1.5 mm">
+                    </div>
+                    <div class="input-box">
+                        <label>Consumer House Type</label>
+                        <input type="text" id="houseType" placeholder="Building">
+                    </div>
+                    <div class="input-box">
+                        <label>Consumer Type</label>
+                        <input type="text" id="consumerType" placeholder="None">
+                    </div>
+
+                    <div class="input-box">
+                        <label>Water Price / Sewer</label>
+                        <input type="text" id="waterPrice" placeholder="None">
+                    </div>
+                    <div class="input-box">
+                        <label>Meter Install Date</label>
+                        <input type="date" id="installDate">
+                    </div>
+                    <div class="input-box">
+                        <label>AMR Install Date</label>
+                        <input type="date" id="amrDate">
+                    </div>
+
+                    <div class="input-box">
+                        <label>Initial Status</label>
+                        <select id="status">
+                            <option value="online">Operational (Online)</option>
+                            <option value="offline">Standby (Offline)</option>
+                        </select>
+                    </div>
+
+                    <div style="grid-column: span 3; text-align: right; margin-top: 20px;">
+                        <span id="successMsg" class="success-msg">Device registered with detailed credentials!</span>
+                        <button type="submit" class="btn btn-primary">Authorize Node</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="content-panel">
+                <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Node Registry & Health Status</h2>
+                    <input type="text" id="searchInput" placeholder="Search by Account No..." oninput="renderTable()" style="padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-primary); width: 250px;">
+                </div>
+                <table id="deviceTable">
+                    <thead>
+                        <tr>
+                            <th>Account No</th>
+                            <th>Device ID</th>
+                            <th>Device Owner</th>
+                            <th>Node Location</th>
+                            <th>Status Matrix</th>
+                            <th>Operational Logs</th>
+                            <th>Water Reading</th>
+                            <th>Action & Flags</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deviceTableBody">
+                        <!-- Data injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        if(!JSON.parse(localStorage.getItem('awf_adminAuth'))) window.location.href = 'index.html';
+        let devices = [];
+
+        async function fetchDevices() {
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/devices');
+                devices = await res.json();
+                renderTable();
+            } catch (e) {
+                console.error("API Error: ", e);
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('deviceTableBody');
+            const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const filtered = devices.filter(d => (d.accountNo || d.id).toLowerCase().includes(search));
+            
+            tbody.innerHTML = filtered.map((d) => {
+                const index = devices.indexOf(d);
+                return `
+                <tr>
+                    <td style="color: var(--text-secondary); font-weight: 600;">${d.accountNo || d.id}</td>
+                    <td style="color: var(--accent-blue); font-weight: 700;">${d.id}</td>
+                    <td>${d.owner}</td>
+                    <td><span style="display:inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${d.location}">${d.location}</span></td>
+                    <td>
+                        <span style="color: ${d.status === 'online' ? 'var(--success)' : 'var(--warning)'}; font-weight: 700; text-transform: uppercase; font-size: 11px;">
+                            ${d.status}
+                        </span>
+                    </td>
+                    <td><p style="font-size: 11px; color: var(--text-secondary);">Last updated: ${new Date().toLocaleDateString()}</p></td>
+                    <td><p style="font-weight: 600; color: #fff;">${d.flow || d.currentReading || 0} m³</p></td>
+                    <td style="display: flex; gap: 8px;">
+                        <button onclick="editDevice(${index})" class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;">Edit</button>
+                        <button onclick="toggleFlag('${d.id}')" class="flag-toggle ${d.flagged ? 'flagged' : ''}" style="padding: 4px 10px;">
+                            ${d.flagged ? '⚠️ RESOLVED' : '🚩 FLAG'}
+                        </button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function editDevice(index) {
+            const d = devices[index];
+            document.getElementById('accountNo').value = d.accountNo || d.id;
+            document.getElementById('deviceId').value = d.id;
+            document.getElementById('ownerName').value = d.owner;
+            document.getElementById('ownerPhone').value = d.phone || '';
+            document.getElementById('location').value = d.location;
+            document.getElementById('diu').value = d.diu || '';
+            document.getElementById('meterNo').value = d.meterNo || '';
+            document.getElementById('meterBrand').value = d.meterBrand || '';
+            document.getElementById('meterDiameter').value = d.meterDiameter || '';
+            document.getElementById('houseType').value = d.houseType || '';
+            document.getElementById('consumerType').value = d.consumerType || '';
+            document.getElementById('waterPrice').value = d.waterPrice || '';
+            document.getElementById('installDate').value = d.installDate || '';
+            document.getElementById('amrDate').value = d.amrDate || '';
+            document.getElementById('status').value = d.status;
+            
+            document.getElementById('addDeviceForm').setAttribute('data-edit-index', index);
+            const btn = document.querySelector('#addDeviceForm button[type="submit"]');
+            btn.textContent = "Update Node";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('addDeviceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editIndex = this.getAttribute('data-edit-index');
+            const btn = document.querySelector('#addDeviceForm button[type="submit"]');
+            btn.textContent = "Processing...";
+            
+            const newDeviceData = {
+                accountNo: document.getElementById('accountNo').value,
+                id: document.getElementById('deviceId').value,
+                owner: document.getElementById('ownerName').value,
+                phone: document.getElementById('ownerPhone').value,
+                location: document.getElementById('location').value,
+                status: document.getElementById('status').value,
+                diu: document.getElementById('diu').value,
+                meterNo: document.getElementById('meterNo').value,
+                meterBrand: document.getElementById('meterBrand').value,
+                meterDiameter: document.getElementById('meterDiameter').value,
+                houseType: document.getElementById('houseType').value,
+                consumerType: document.getElementById('consumerType').value,
+                waterPrice: document.getElementById('waterPrice').value,
+                installDate: document.getElementById('installDate').value,
+                amrDate: document.getElementById('amrDate').value,
+                flagged: false
+            };
+
+            try {
+                await fetch('http://127.0.0.1:5000/api/devices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newDeviceData)
+                });
+                
+                document.getElementById('successMsg').textContent = editIndex !== null ? "Device updated successfully in DB!" : "Device registered with DB!";
+                const success = document.getElementById('successMsg');
+                success.style.display = 'inline-block';
+                setTimeout(() => success.style.display = 'none', 3000);
+                
+                this.reset();
+                this.removeAttribute('data-edit-index');
+                btn.textContent = "Authorize Node";
+                
+                fetchDevices();
+            } catch(e) {
+                console.error(e);
+                alert("Failed to connect to API.");
+                btn.textContent = "Authorize Node";
+            }
+        });
+
+        async function toggleFlag(id) {
+            try {
+                await fetch(`http://127.0.0.1:5000/api/devices/flag/${id}`, { method: 'POST' });
+                fetchDevices();
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        fetchDevices();
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Settings • Automated Water Flow System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="base.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside>
+            <div class="brand">
+                <div class="brand-icon">AWF</div>
+                <div class="brand-info">
+                    <h1>Water Flow</h1>
+                    <p>Management</p>
+                </div>
+            </div>
+
+            <nav>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="manage.html" class="nav-link">Manage Devices</a>
+                <a href="billing-audit.html" class="nav-link">Billing & Audit</a>
+                <a href="network-status.html" class="nav-link">Network Status</a>
+                <a href="device-settings.html" class="nav-link active">Device Settings</a>
+            </nav>
+
+            <div class="powered-footer">
+                <p>Strategic Partners</p>
+                <div class="footer-logos">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Daffodil_International_University_Monogram.svg/1280px-Daffodil_International_University_Monogram.svg.png" 
+                         alt="DIU">
+                    <img src="https://www.wateraid.org/au/sites/g/files/jkxoof231/files/wateraids-new-logo.png" 
+                         alt="WaterAid">
+                </div>
+                <a href="#" onclick="localStorage.removeItem('awf_adminAuth'); window.location.href='index.html';" class="nav-link" style="margin-top: 32px; color: var(--danger); justify-content: center; padding-left: 0;">Logout System</a>
+            </div>
+        </aside>
+
+        <main>
+            <header>
+                <div class="page-title">
+                    <h2>Device Settings</h2>
+                    <p>Configure device parameters and calibration</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="text-align: right;">
+                        <p style="font-weight: 700; font-size: 14px;">System Admin</p>
+                        <p style="font-size: 11px; color: var(--text-secondary);">Zone 05 • Central Auth</p>
+                    </div>
+                </div>
+            </header>
+
+            <div style="display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; align-items: start;">
+                <div class="content-panel">
+                    <div class="panel-header">
+                        <h2>Device Configuration</h2>
+                    </div>
+                    <form id="settingsForm" class="form-section" style="grid-template-columns: 1fr;">
+                        
+                        <div class="input-box">
+                            <label>Device ID</label>
+                            <select id="deviceIdSelect" required>
+                                <option value="" disabled selected>Select a Device ID</option>
+                            </select>
+                        </div>
+
+                        <div class="input-box">
+                            <label>Setting Parameter</label>
+                            <select id="parameterSelect" required>
+                                <option value="set_water">Set Water</option>
+                                <option value="set_metter">Set Metter</option>
+                                <option value="set_flow">Set Flow</option>
+                            </select>
+                        </div>
+
+                        <div class="input-box">
+                            <label>Value</label>
+                            <input type="text" id="settingValue" placeholder="Enter new value" required>
+                        </div>
+
+                        <div style="text-align: right; margin-top: 10px;">
+                            <span id="commitSuccess" style="color: var(--success); font-size: 14px; margin-right: 15px; display: none;">Configuration Committed!</span>
+                            <button type="submit" class="btn btn-primary">Commit</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="content-panel" id="deviceDetailsCard" style="display: none;">
+                    <div class="panel-header" style="background: rgba(56, 189, 248, 0.05);">
+                        <h2>Device Overview</h2>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <img src="https://ui-avatars.com/api/?name=User&background=38bdf8&color=000" id="userAvatar" 
+                                 alt="avatar" style="width: 64px; height: 64px; border-radius: 50%; border: 3px solid var(--accent-blue); margin-bottom: 12px;">
+                            <h3 id="cardUserName" style="font-size: 18px; margin-bottom: 4px;">--</h3>
+                            <span id="cardStatus" style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;">--</span>
+                        </div>
+                        
+                        <div style="display: grid; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+                            <div>
+                                <p style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Contact Number</p>
+                                <p id="cardPhone" style="font-weight: 600;">--</p>
+                            </div>
+                            <div>
+                                <p style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Location</p>
+                                <p id="cardLocation" style="font-weight: 600; font-size: 13px;">--</p>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div>
+                                    <p style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Meter No</p>
+                                    <p id="cardMeter" style="font-weight: 600;">--</p>
+                                </div>
+                                <div>
+                                    <p style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Water Used</p>
+                                    <p id="cardUsage" style="font-weight: 600; color: var(--accent-blue);">--</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        if(!JSON.parse(localStorage.getItem('awf_adminAuth'))) window.location.href = 'index.html';
+        let allDevices = [];
+
+        async function fetchDevices() {
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/devices');
+                allDevices = await res.json();
+                
+                const select = document.getElementById('deviceIdSelect');
+                allDevices.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.id;
+                    opt.textContent = `${d.id} - ${d.owner}`;
+                    select.appendChild(opt);
+                });
+
+                // Load previously selected device if it exists
+                const storedDevice = localStorage.getItem('global_selected_device');
+                if(storedDevice) {
+                    select.value = storedDevice;
+                    updateSideCard(storedDevice);
+                }
+
+            } catch (e) { console.error("API Error: ", e); }
+        }
+
+        function updateSideCard(selectedId) {
+            const card = document.getElementById('deviceDetailsCard');
+            if (!selectedId) {
+                card.style.display = 'none';
+                return;
+            }
+            
+            const device = allDevices.find(d => d.id === selectedId);
+            if (device) {
+                card.style.display = 'block';
+                document.getElementById('cardUserName').textContent = device.owner;
+                document.getElementById('cardPhone').textContent = device.phone || "N/A";
+                document.getElementById('cardLocation').textContent = device.location || "N/A";
+                document.getElementById('cardMeter').textContent = device.meterNo || "N/A";
+                document.getElementById('cardUsage').textContent = (device.usage || device.consumption || "0.00") + " m³";
+                
+                const statusEl = document.getElementById('cardStatus');
+                statusEl.textContent = device.status.toUpperCase();
+                
+                // Style status pill
+                if(device.status === 'online') {
+                    statusEl.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                    statusEl.style.color = 'var(--success)';
+                } else {
+                    statusEl.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                    statusEl.style.color = 'var(--warning)';
+                }
+                
+                // Update avatar
+                document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(device.owner)}&background=38bdf8&color=000`;
+            }
+        }
+
+        fetchDevices();
+
+        // Keep local storage updated on change
+        document.getElementById('deviceIdSelect').addEventListener('change', function(e) {
+            localStorage.setItem('global_selected_device', e.target.value);
+            updateSideCard(e.target.value);
+        });
+
+        document.getElementById('settingsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const deviceId = document.getElementById('deviceIdSelect').value;
+            const param = document.getElementById('parameterSelect').value;
+            const value = document.getElementById('settingValue').value;
+            
+            // Ensure global selected device is saved
+            localStorage.setItem('global_selected_device', deviceId);
+
+            // Save the setting internally
+            localStorage.setItem('device_setting_' + deviceId + '_' + param, value);
+
+            const successMsg = document.getElementById('commitSuccess');
+            successMsg.style.display = 'inline-block';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+                document.getElementById('settingValue').value = '';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

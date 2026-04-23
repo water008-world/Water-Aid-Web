@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Status • Automated Water Flow System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="base.css">
+    <style>
+        .network-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .network-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .network-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .device-id-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--accent-blue);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .status-indicator {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .status-indicator.online { background-color: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-indicator.offline { background-color: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+        .owner-info {
+            margin-bottom: 24px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .owner-info .subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .metric-label {
+            display: block;
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        /* Signal Bars */
+        .signal-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .signal-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 24px;
+        }
+
+        .bar {
+            width: 6px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            transition: background-color 0.3s;
+        }
+
+        .bar.active {
+            background-color: var(--accent-blue);
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+        }
+        
+        .bar.active.animate-tower {
+            animation: barPulse 1.5s infinite alternate;
+        }
+
+        @keyframes barPulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .bar-1 { height: 6px; animation-delay: 0.1s; }
+        .bar-2 { height: 10px; animation-delay: 0.2s; }
+        .bar-3 { height: 15px; animation-delay: 0.3s; }
+        .bar-4 { height: 19px; animation-delay: 0.4s; }
+        .bar-5 { height: 24px; animation-delay: 0.5s; }
+
+        .gsm-val {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Battery */
+        .battery-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .battery-icon {
+            width: 32px;
+            height: 16px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 3px;
+            position: relative;
+            padding: 1px;
+        }
+
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: 3px;
+            width: 2px;
+            height: 6px;
+            background: var(--text-secondary);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .battery-level {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 1px;
+            transition: width 1s ease-in-out;
+        }
+
+        /* Flow Rate */
+        .live-flow {
+            text-align: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .flow-value {
+            font-size: 28px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .flow-value.flowing {
+            color: var(--accent-blue);
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Glow animation for online cards */
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .network-card.online::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulseGlow 2s infinite;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside>
+            <div class="brand">
+                <div class="brand-icon">AWF</div>
+                <div class="brand-info">
+                    <h1>Water Flow</h1>
+                    <p>Management</p>
+                </div>
+            </div>
+
+            <nav>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="manage.html" class="nav-link">Manage Devices</a>
+                <a href="billing-audit.html" class="nav-link">Billing & Audit</a>
+                <a href="network-status.html" class="nav-link active">Network Status</a>
+                <a href="device-settings.html" class="nav-link">Device Settings</a>
+            </nav>
+
+            <div class="powered-footer">
+                <p>Strategic Partners</p>
+                <div class="footer-logos">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Daffodil_International_University_Monogram.svg/1280px-Daffodil_International_University_Monogram.svg.png" 
+                         alt="DIU">
+                    <img src="https://www.wateraid.org/au/sites/g/files/jkxoof231/files/wateraids-new-logo.png" 
+                         alt="WaterAid">
+                </div>
+                <a href="#" onclick="localStorage.removeItem('awf_adminAuth'); window.location.href='index.html';" class="nav-link" style="margin-top: 32px; color: var(--danger); justify-content: center; padding-left: 0;">Logout System</a>
+            </div>
+        </aside>
+
+        <main>
+            <header>
+                <div class="page-title">
+                    <h2>Network & Telemetry Status</h2>
+                    <p>Real-time GSM diagnostics (ESP & A7607 Modules)</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="text-align: right;">
+                        <p style="font-weight: 700; font-size: 14px;">System Admin</p>
+                        <p style="font-size: 11px; color: var(--text-secondary);">Zone 05 • Central Auth</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="network-cards-grid" id="networkCardsGrid">
+                <!-- Data injected by JS -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        if(!JSON.parse(localStorage.getItem('awf_adminAuth'))) window.location.href = 'index.html';
+        async function renderNetworkCards() {
+            let devices = [];
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/devices');
+                devices = await res.json();
+            } catch (e) { console.error("API Error: ", e); }
+
+            const grid = document.getElementById('networkCardsGrid');
+            
+            grid.innerHTML = devices.map(d => {
+                const isOnline = d.status === 'online';
+                
+                // Use real DB value or default to offline 0
+                const gsmValue = isOnline ? (d.network_signal !== undefined ? d.network_signal : 24) : 0;
+                
+                let bars = 0;
+                if (gsmValue > 25) bars = 5;
+                else if (gsmValue > 20) bars = 4;
+                else if (gsmValue > 14) bars = 3;
+                else if (gsmValue > 7) bars = 2;
+                else if (gsmValue > 0) bars = 1;
+
+                // Battery logic from DB
+                const battery = isOnline ? (d.battery !== undefined ? d.battery : 98) : 0;
+                let batteryColor = 'var(--danger)';
+                if (battery > 50) batteryColor = 'var(--success)';
+                else if (battery > 20) batteryColor = 'var(--warning)';
+
+                // Flow fluctuation logic
+                const flowRate = isOnline ? (Math.random() * 5 + 2).toFixed(2) : '0.00';
+
+                return `
+                <div class="network-card ${isOnline ? 'online' : 'offline'}">
+                    <div class="card-header">
+                        <div class="device-id-badge">${d.id}</div>
+                        <span class="status-indicator ${d.status}">${d.status}</span>
+                    </div>
+                    
+                    <div class="owner-info">
+                        ${d.owner}
+                        <div class="subtitle">Account: ${d.accountNo || d.id}</div>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <span class="metric-label">GSM Signal (A7607)</span>
+                            <div class="signal-container">
+                                <div class="signal-bars">
+                                    <div class="bar bar-1 ${bars >= 1 ? 'active animate-tower' : ''}"></div>
+                                    <div class="bar bar-2 ${bars >= 2 ? 'active animate-tower' : ''}"></div>
+                                    <div class="bar bar-3 ${bars >= 3 ? 'active animate-tower' : ''}"></div>
+                                    <div class="bar bar-4 ${bars >= 4 ? 'active animate-tower' : ''}"></div>
+                                    <div class="bar bar-5 ${bars >= 5 ? 'active animate-tower' : ''}"></div>
+                                </div>
+                                <span class="gsm-val">${gsmValue}/31</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-box">
+                            <span class="metric-label">Battery Level</span>
+                            <div class="battery-container">
+                                <div class="battery-icon">
+                                    <div class="battery-level" style="width: ${battery}%; background-color: ${batteryColor};"></div>
+                                </div>
+                                <span class="gsm-val" style="color: ${batteryColor};">${battery}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="live-flow">
+                        <span class="metric-label">Live Flow Rate (L/min)</span>
+                        <div class="flow-value ${isOnline && flowRate > 0 ? 'flowing' : ''}">${flowRate}</div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Initial render
+        renderNetworkCards();
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard • Automated Water Flow System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="base.css">
+    <style>
+        .enterprise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .enterprise-header h2 {
+            font-size: 20px;
+        }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pill.online {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-pill.offline {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-pill.flagged {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Advanced Modal Tuning */
+        .reading-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+        }
+
+        .reading-card {
+            text-align: center;
+        }
+
+        .reading-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .reading-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .btn-query {
+            background: var(--bg-main);
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .btn-query:hover {
+            background: var(--accent-blue);
+            color: #000;
+        }
+
+        .meta-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            margin-top: 24px;
+        }
+
+        .meta-item {
+            font-size: 13px;
+        }
+
+        .meta-key {
+            color: var(--text-secondary);
+            margin-right: 8px;
+        }
+
+        .meta-val {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .status-online {
+            color: var(--success) !important;
+        }
+
+        .status-offline {
+            color: var(--warning) !important;
+        }
+
+        .status-flagged {
+            color: var(--danger) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <aside>
+            <div class="brand">
+                <div class="brand-icon">AWF</div>
+                <div class="brand-info">
+                    <h1>Water Flow</h1>
+                    <p>Management</p>
+                </div>
+            </div>
+
+            <nav>
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="manage.html" class="nav-link">Manage Devices</a>
+                <a href="billing-audit.html" class="nav-link">Billing & Audit</a>
+                <a href="network-status.html" class="nav-link">Network Status</a>
+                <a href="device-settings.html" class="nav-link">Device Settings</a>
+            </nav>
+
+            <div class="powered-footer">
+                <p>Strategic Partners</p>
+                <div class="footer-logos">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Daffodil_International_University_Monogram.svg/1280px-Daffodil_International_University_Monogram.svg.png"
+                        alt="DIU">
+                    <img src="https://www.wateraid.org/au/sites/g/files/jkxoof231/files/wateraids-new-logo.png"
+                        alt="WaterAid">
+                </div>
+                <a href="#" onclick="localStorage.removeItem('awf_adminAuth'); window.location.href='index.html';"
+                    class="nav-link"
+                    style="margin-top: 32px; color: var(--danger); justify-content: center; padding-left: 0;">Logout
+                    System</a>
+            </div>
+        </aside>
+
+        <main>
+            <header>
+                <div class="page-title">
+                    <h2>Dashboard Overview</h2>
+                    <p>Real-time analytics and telemetry of smart water devices</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <button class="btn btn-primary" onclick="openProfileSettings()"
+                        style="padding: 6px 12px; font-size: 12px; background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: #fff;">Profile
+                        Settings</button>
+                    <div style="text-align: right;">
+                        <p style="font-weight: 700; font-size: 14px;" id="authAdminName">Verifying...</p>
+                        <p style="font-size: 11px; color: var(--text-secondary);" id="authAdminRole">--</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card" onclick="renderDashboard('all')" style="cursor: pointer;">
+                    <h3>Total Connected</h3>
+                    <div class="value" id="totalCount">0</div>
+                </div>
+                <div class="stat-card active" onclick="renderDashboard('active')" style="cursor: pointer;">
+                    <h3>Active System</h3>
+                    <div class="value" id="activeCount">0</div>
+                </div>
+                <div class="stat-card inactive" onclick="renderDashboard('offline')" style="cursor: pointer;">
+                    <h3>Inactive System</h3>
+                    <div class="value" id="inactiveCount">0</div>
+                </div>
+                <div class="stat-card flagged" onclick="renderDashboard('flagged')" style="cursor: pointer;">
+                    <h3>Critical Flags</h3>
+                    <div class="value" id="flagCount">0</div>
+                </div>
+            </div>
+
+            <div class="content-panel">
+                <div class="panel-header">
+                    <div class="enterprise-header" style="width: 100%; margin-bottom: 0;">
+                        <h2>Connected Devices Overview</h2>
+                        <button class="btn btn-primary" onclick="downloadCSV()"
+                            style="font-size: 11px; padding: 6px 16px;">Download CSV</button>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto; width: 100%;">
+                    <table id="deviceTable">
+                        <thead>
+                            <tr>
+                                <th>A/C No</th>
+                                <th>Device ID</th>
+                                <th>Address</th>
+                                <th>Current Reading (m³)</th>
+                                <th>Current Date/Time</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deviceTableBody">
+                            <!-- Data injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal-overlay" id="detailsModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="modalTitle">Device Details Info</h2>
+                <button class="close-modal" onclick="closeDetails()">&times;</button>
+            </div>
+
+            <button class="btn-query"> QUERY ON DEMAND READING</button>
+
+            <div class="reading-section">
+                <div class="reading-card">
+                    <p class="reading-label">Status</p>
+                    <p class="reading-value" id="mStatus" style="font-size: 14px; text-transform: uppercase;">ONLINE</p>
+                </div>
+                <div class="reading-card">
+                    <p class="reading-label">Reading (m³)</p>
+                    <p class="reading-value" id="mReadingM3">0.00</p>
+                </div>
+                <div class="reading-card">
+                    <p class="reading-label">Reading (Ltr)</p>
+                    <p class="reading-value" id="mReadingLtr">0</p>
+                </div>
+                <div class="reading-card"
+                    style="grid-column: span 3; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
+                    <p class="reading-label">Today's Usage</p>
+                    <p class="reading-value" id="mUsage" style="color: var(--success)">0.00 m³</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <p class="modal-label" id="chartTitleText"
+                        style="margin-bottom: 0; font-size: 11px; text-transform: uppercase; color: var(--text-secondary);">
+                        Cumulative Water Consumption</p>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="date" id="chartStartDate" class="date-input"
+                            style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; color-scheme: dark;">
+                        <span style="color: var(--text-secondary); font-size: 11px;">to</span>
+                        <input type="date" id="chartEndDate" class="date-input"
+                            style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; color-scheme: dark;">
+                        <button class="btn btn-query" onclick="updateChartDateRange()"
+                            style="padding: 4px 12px; margin-bottom: 0; width: auto; font-size: 11px;">Filter
+                            Data</button>
+                    </div>
+                </div>
+                <canvas id="consumptionChart"></canvas>
+            </div>
+
+            <div class="meta-list">
+                <div class="meta-item"><span class="meta-key">DIU No:</span><span class="meta-val"
+                        id="metaDma">--</span></div>
+                <div class="meta-item"><span class="meta-key">Device Id:</span><span class="meta-val"
+                        id="metaDevId">--</span></div>
+                <div class="meta-item"><span class="meta-key">Device SIM:</span><span class="meta-val"
+                        id="metaSim">--</span></div>
+                <div class="meta-item"><span class="meta-key">Consumer Name:</span><span class="meta-val"
+                        id="metaName">--</span></div>
+                <div class="meta-item"><span class="meta-key">Account No:</span><span class="meta-val"
+                        id="metaAcc">--</span></div>
+                <div class="meta-item"><span class="meta-key">Meter No:</span><span class="meta-val"
+                        id="metaMetNo">--</span></div>
+                <div class="meta-item"><span class="meta-key">Meter Brand:</span><span class="meta-val"
+                        id="metaMetBrand">--</span></div>
+                <div class="meta-item"><span class="meta-key">Meter Diameter:</span><span class="meta-val"
+                        id="metaMetDia">--</span></div>
+                <div class="meta-item" style="grid-column: span 2;"><span class="meta-key">Consumer Address:</span><span
+                        class="meta-val" id="metaAddress">--</span></div>
+                <div class="meta-item"><span class="meta-key">Consumer Contact:</span><span class="meta-val"
+                        id="metaContact">--</span></div>
+                <div class="meta-item"><span class="meta-key">House Type:</span><span class="meta-val"
+                        id="metaHouse">--</span></div>
+                <div class="meta-item"><span class="meta-key">Consumer Type:</span><span class="meta-val"
+                        id="metaType">--</span></div>
+                <div class="meta-item"><span class="meta-key">Water Price:</span><span class="meta-val"
+                        id="metaPrice">--</span></div>
+                <div class="meta-item"><span class="meta-key">Meter Install Date:</span><span class="meta-val"
+                        id="metaInstDate">--</span></div>
+                <div class="meta-item"><span class="meta-key">AMR Install Date:</span><span class="meta-val"
+                        id="metaAmrDate">--</span></div>
+            </div>
+
+            <div style="margin-top: 32px; text-align: right;">
+                <button class="btn btn-primary" onclick="closeDetails()">Close Detailed Report</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="profileModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
+        <div
+            style="background: var(--bg-card); padding: 32px; border-radius: var(--radius-lg); border: 1px solid var(--border); width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="font-size: 18px;">Admin Profile Details</h3>
+                <span onclick="document.getElementById('profileModal').style.display='none'"
+                    style="cursor:pointer; color:var(--text-secondary); font-size: 20px;">&times;</span>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <p style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Logged In As</p>
+                <p id="profUsername" style="font-size: 18px; font-weight: 700; color: var(--accent-blue);">--</p>
+                <p id="profRole"
+                    style="font-size: 12px; font-weight: 600; padding: 4px 8px; background: rgba(255,255,255,0.1); display: inline-block; border-radius: 4px; margin-top: 8px;">
+                    --</p>
+            </div>
+
+            <div id="masterAdminPanel" style="display: none; border-top: 1px solid var(--border); padding-top: 24px;">
+                <h4 style="margin-bottom: 16px; font-size: 14px; color: var(--success);">Master Dashboard: Appoint New
+                    Admin</h4>
+                <form id="newAdminForm">
+                    <div style="margin-bottom: 16px;">
+                        <label
+                            style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Admin
+                            Username</label>
+                        <input type="text" id="newAdminUser"
+                            style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: #fff; border-radius: 4px;"
+                            required>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label
+                            style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Admin
+                            Password</label>
+                        <input type="password" id="newAdminPass"
+                            style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: #fff; border-radius: 4px;"
+                            required>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label
+                            style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">System
+                            Role</label>
+                        <select id="newAdminRole"
+                            style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border); color: #fff; border-radius: 4px;">
+                            <option value="admin">Standard Admin (View & Manage)</option>
+                            <option value="master">Master Admin (Full Rights)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Create Authentication
+                        Profile</button>
+                    <p id="newAdminMsg"
+                        style="margin-top: 10px; font-size: 12px; color: var(--success); display: none; text-align: center;">
+                        Successfully added!</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // --- Authentication Gate ---
+        const authPayload = JSON.parse(localStorage.getItem('awf_adminAuth'));
+        if (!authPayload) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('authAdminName').textContent = authPayload.username.toUpperCase();
+            document.getElementById('authAdminRole').textContent = authPayload.role.toUpperCase() + " ACCESS PRIVILEGE";
+        }
+
+        // --- Profile Modal Logic ---
+        function openProfileSettings() {
+            document.getElementById('profileModal').style.display = 'flex';
+            document.getElementById('profUsername').textContent = authPayload.username;
+            document.getElementById('profRole').textContent = authPayload.role.toUpperCase() + " ROLE";
+            if (authPayload.role === 'master') {
+                document.getElementById('masterAdminPanel').style.display = 'block';
+            }
+        }
+
+        document.getElementById('newAdminForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const u = document.getElementById('newAdminUser').value;
+            const p = document.getElementById('newAdminPass').value;
+            const r = document.getElementById('newAdminRole').value;
+
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/admins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p, role: r })
+                });
+                const data = await res.json();
+                const msg = document.getElementById('newAdminMsg');
+                msg.style.display = 'block';
+
+                if (res.ok) {
+                    msg.innerHTML = "<b>Success:</b> Admin assigned successfully!";
+                    msg.style.color = 'var(--success)';
+                    this.reset();
+                    setTimeout(() => msg.style.display = 'none', 3000);
+                } else {
+                    msg.textContent = data.error || "Failed to create.";
+                    msg.style.color = 'var(--warning)';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // --- Dash Logic ---
+        let consumptionChart = null;
+        let globalDevices = [];
+        let activeDeviceIndex = null;
+
+        async function fetchDevices() {
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/devices');
+                return await res.json();
+            } catch (e) {
+                console.error("API Error: ", e);
+                return [];
+            }
+        }
+
+        async function renderDashboard(filter = 'all') {
+            const tbody = document.getElementById('deviceTableBody');
+
+            globalDevices = await fetchDevices();
+            let data = globalDevices;
+
+            let active = 0;
+            let inactive = 0;
+            let flagged = 0;
+
+            data.forEach(d => {
+                if (d.flagged) flagged++;
+                if (d.status === 'online') active++; else inactive++;
+            });
+
+            document.getElementById('totalCount').textContent = data.length;
+            document.getElementById('activeCount').textContent = active;
+            document.getElementById('inactiveCount').textContent = inactive;
+            document.getElementById('flagCount').textContent = flagged;
+
+            // Apply filtering logic
+            const filtered = data.filter(d => {
+                if (filter === 'active') return d.status === 'online';
+                if (filter === 'offline') return d.status === 'offline';
+                if (filter === 'flagged') return d.flagged === true;
+                return true;
+            });
+
+            tbody.innerHTML = filtered.map((d) => {
+                const globalIndex = data.findIndex(org => org.id === d.id);
+                return `
+                <tr>
+                    <td style="color: var(--text-secondary); font-weight: 600;">${d.accountNo || d.id}</td>
+                    <td style="color: var(--accent-blue); font-weight: 700;">${d.id}</td>
+                    <td><span style="display:inline-block; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${d.location}">${d.location}</span></td>
+                    <td><p style="font-weight: 600; color: var(--text-primary);">${d.currentReading || d.flow || '0.00'}</p></td>
+                    <td><p style="font-size:11px; color: var(--text-secondary)">${d.currentDate || '-'}</p></td>
+                    <td>
+                        <span class="status-pill ${d.status}">
+                            ${d.status === 'online' ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td style="text-align: center;">
+                        <button onclick="showDetails(${globalIndex})" class="btn" style="background: var(--accent-blue); color: #000; font-size:11px; padding: 4px 10px; font-weight: 700;">Details</button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function showDetails(index) {
+            activeDeviceIndex = index;
+            let data = globalDevices;
+            const d = data[index];
+
+            // Reading Info
+            document.getElementById('mStatus').textContent = (d.flagged ? 'Problem Flagged' : d.status.toUpperCase());
+            document.getElementById('mStatus').className = `reading-value status-${d.flagged ? 'flagged' : d.status}`;
+            document.getElementById('mReadingM3').textContent = d.currentReading || d.flow || "0.00";
+            document.getElementById('mReadingLtr').textContent = (parseFloat(d.currentReading || d.flow || 0) * 1000).toLocaleString();
+            document.getElementById('mUsage').textContent = (d.consumption || d.usage || "0.00") + " m³";
+
+            // Metadata List
+            document.getElementById('metaDma').textContent = d.diu || "ALL DIU";
+            document.getElementById('metaDevId').textContent = d.id;
+            document.getElementById('metaSim').textContent = d.phone || "N/A";
+            document.getElementById('metaName').textContent = d.owner;
+            document.getElementById('metaAcc').textContent = d.id;
+            document.getElementById('metaMetNo').textContent = d.meterNo || "N/A";
+            document.getElementById('metaMetBrand').textContent = d.meterBrand || "BAYLAN";
+            document.getElementById('metaMetDia').textContent = d.meterDiameter || "1.5 mm";
+            document.getElementById('metaAddress').textContent = d.location;
+            document.getElementById('metaContact').textContent = d.phone || "N/A";
+            document.getElementById('metaHouse').textContent = d.houseType || "Building";
+            document.getElementById('metaType').textContent = d.consumerType || "None";
+            document.getElementById('metaPrice').textContent = d.waterPrice || "None";
+            document.getElementById('metaInstDate').textContent = d.installDate || "N/A";
+            document.getElementById('metaAmrDate').textContent = d.amrDate || "N/A";
+
+            document.getElementById('detailsModal').style.display = 'flex';
+
+            // Make dates default to last 7 days
+            const end = new Date();
+            const start = new Date();
+            start.setDate(end.getDate() - 6);
+
+            document.getElementById('chartEndDate').valueAsDate = end;
+            document.getElementById('chartStartDate').valueAsDate = start;
+
+            drawChart(d, start, end);
+        }
+
+        function updateChartDateRange() {
+            if (activeDeviceIndex === null) return;
+            const startObj = new Date(document.getElementById('chartStartDate').value);
+            const endObj = new Date(document.getElementById('chartEndDate').value);
+            if (startObj && endObj && startObj <= endObj) {
+                drawChart(globalDevices[activeDeviceIndex], startObj, endObj);
+            } else {
+                alert("Please select a valid date range (start date must be before or equal to end date).");
+            }
+        }
+
+        function drawChart(d, startObj, endObj) {
+            // Calculate days between
+            const diffTime = Math.abs(endObj - startObj);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            document.getElementById('chartTitleText').textContent = `Cumulative Water Consumption (${diffDays}-Day Period)`;
+
+            let seed = d.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            let base = (seed % 50) + 20;
+
+            const labels = [];
+            const graphData = [];
+
+            for (let i = 0; i < diffDays; i++) {
+                const curDate = new Date(startObj);
+                curDate.setDate(curDate.getDate() + i);
+                labels.push(curDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+
+                base += 5 + ((seed * (i + 1)) % 15);
+                graphData.push(parseFloat(base.toFixed(2)));
+            }
+
+            if (consumptionChart) consumptionChart.destroy();
+
+            const ctx = document.getElementById('consumptionChart').getContext('2d');
+            consumptionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Accumulated Flow (m³)',
+                        data: graphData,
+                        borderColor: '#38bdf8',
+                        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#38bdf8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function closeDetails() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+
+        function downloadCSV() {
+            let csvData = globalDevices;
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Account No,Device ID,Consumer Name,Address,Status,Water Usage (m3),Current Reading (m3)\n";
+            csvData.forEach(function (d) {
+                // Ensure quotes to handle commas in location/owners
+                let row = `"${d.accountNo || d.id}","${d.id}","${d.owner}","${d.location}",${d.status},${d.consumption || d.usage || '0.00'},${d.currentReading || d.flow || '0.00'}`;
+                csvContent += row + "\n";
+            });
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "device_network_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        renderDashboard();
+    </script>
+</body>
+
+</html>
